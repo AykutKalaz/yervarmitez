@@ -17,12 +17,66 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  String musteriMail = "", musteriSifre = "";
+  String musteriMail = "", musteriSifre = "", ctrl;
   bool checkValue = false;
+  SharedPreferences prefs;
 
-  Future<void> AutoLogin() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String userId = prefs.getString('username');
+  @override
+  void initState() {
+    pageRoute();
+    super.initState();
+  }
+
+  @override
+  void setState(fn) {
+    pageRoute();
+    super.setState(fn);
+  }
+
+  Future<void> pageRoute() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool("userId") == true) {
+      await GirisBilgiGonder(prefs.getString("email"), prefs.getString("sifre"))
+          .then((value) {
+        if (value.toString() == "success") {
+          ctrl = "success";
+          print(ctrl);
+          basariliGiris();
+        } else {
+          ctrl = "false";
+          prefs.setBool("userId", false);
+          print(ctrl);
+        }
+      });
+    }
+  }
+
+  basariliGiris() {
+    Future.delayed(Duration(seconds: 2), () {
+      if (ctrl == "success") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return KategoriEkrani();
+          }),
+        );
+      }
+    });
+  }
+
+  Future<void> deneme() async {
+    prefs = await SharedPreferences.getInstance();
+    await GirisBilgiGonder(musteriMail, musteriSifre).then((value) {
+      if (value.toString() == "success") {
+        prefs.setString("email", musteriMail);
+        prefs.setString("sifre", musteriSifre);
+        prefs.setBool("userId", true);
+        ctrl = "success";
+      } else {
+        prefs.setBool("userId", false);
+        ctrl = "false";
+      }
+    });
   }
 
   @override
@@ -76,25 +130,8 @@ class _BodyState extends State<Body> {
             RoundedButton(
               text: "Giriş Yap",
               press: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return KategoriEkrani();
-                }));
-                Future<int> ctrl = GirisBilgiGonder(musteriMail, musteriSifre);
-                //KategoriBilgiGetir();
-                /*if (ctrl == 200) {
-                var autoValidate = true;
-                SharedPrefs.mailKaydet(musteriMail);
-                SharedPrefs.sifreKaydet(musteriSifre);
-                SharedPrefs.giris();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    return TestEkrani(
-                      kullaniciMail: musteriMail,
-                    );
-                  }),
-                );
-                }*/
+                deneme();
+                basariliGiris();
               },
             ),
             SizedBox(

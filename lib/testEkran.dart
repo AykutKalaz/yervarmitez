@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/servisler.dart';
 
@@ -16,124 +14,145 @@ class TestEkrani extends StatefulWidget {
 }
 
 class _TestEkraniState extends State<TestEkrani> {
-  Future<List<Ilceler>> ilceListesi;
-  SharedPreferences prefs;
   int il_no;
-  Iller il;
-  Ilceler ilce = null;
+  List<Iller> ilListesi = <Iller>[];
+  List<Ilceler> ilceListesi = <Ilceler>[];
+  Iller seciliIl;
+  Ilceler seciliIlce;
+  Future<void> _initForm;
+
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        FutureProvider<List<Iller>>(
-          create: (context) => widget.ilListesi,
-        ),
-        FutureProvider<List<Ilceler>>(
-          create: (context) => ilceListesi,
-        ),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: kPrimaryColor,
-          title: Text(
-            "${widget.kategoriAdi} Ekrani",
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            color: kPrimaryLightColor,
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Consumer<List<Iller>>(builder: (context, deneme, child) {
-                    return DropdownButton(
-                      value: il,
-                      dropdownColor: Colors.orangeAccent,
-                      underline: Container(
-                        height: 2,
-                        color: Colors.deepPurpleAccent,
-                      ),
-                      onChanged: (Iller newValue) {
-                        setState(() {
-                          il = newValue;
-                          il_no = il.ilID;
-                        });
-                      },
-                      items: deneme
-                          .map((e) => DropdownMenuItem<Iller>(
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(
-                                      e.ilAdi,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                value: e,
-                              ))
-                          .toList(),
-                    );
-                  }),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  FutureBuilder<List<Ilceler>>(
-                    future: ilceGetir(il_no),
-                    builder: (context, snapshot) {
-                      return il_no == null
-                          ? CircularProgressIndicator()
-                          : DropdownButton(
-                              value: ilce,
-                              dropdownColor: Colors.orangeAccent,
-                              underline: Container(
-                                height: 2,
-                                color: Colors.deepPurpleAccent,
-                              ),
-                              onChanged: (Ilceler newValue) {
-                                setState(() {
-                                  print(newValue.ilceAdi);
-                                  ilce = newValue;
-                                });
-                              },
-                              items: snapshot.data
-                                  .map(
-                                    (Ilceler e) => DropdownMenuItem<Ilceler>(
-                                      value: e,
-                                      child: Row(
-                                        children: <Widget>[
-                                          Text(
-                                            e.ilceAdi,
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _initForm = _initStateAsync();
   }
 
-  Future<void> deneme() async {
-    prefs = await SharedPreferences.getInstance();
-    prefs.clear();
+  Future<void> _initStateAsync() async {
+    ilListesi.clear();
+    ilListesi.addAll(await widget.ilListesi);
+  }
+
+  void _onIlSelected(Iller seciliIl) async {
+    try {
+      final cityList = await ilceGetir(seciliIl.ilID);
+      setState(() {
+        this.seciliIl = seciliIl;
+        seciliIlce = null;
+        ilceListesi.clear();
+        ilceListesi.addAll(cityList);
+      });
+    } catch (e) {
+      //TODO: handle error
+      rethrow;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget _buildLoading() {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(height: 10.0),
+            Text('İller yükleniyor...'),
+          ],
+        ),
+      );
+    }
+
+    Widget _buildError(dynamic error) {
+      return Center(
+        child: Text("Error occured: $error"),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: kPrimaryColor,
+        title: Text(
+          "${widget.kategoriAdi} Ekrani",
+        ),
+      ),
+      body: FutureBuilder<void>(
+        future: _initForm,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return _buildLoading();
+          else if (snapshot.hasError)
+            return _buildError(snapshot.error);
+          else
+            return SingleChildScrollView(
+              child: Container(
+                color: kPrimaryLightColor,
+                child: Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      DropdownButton<Iller>(
+                        value: seciliIl,
+                        onChanged: _onIlSelected,
+                        dropdownColor: Colors.orangeAccent,
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        items: ilListesi
+                            .map(
+                              (e) => DropdownMenuItem(
+                                child: Text(
+                                  e.ilAdi,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                value: e,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      DropdownButton<Ilceler>(
+                        value: seciliIlce,
+                        onChanged: (Ilceler selectedIlce) {
+                          setState(() {
+                            this.seciliIlce = selectedIlce;
+                          });
+                        },
+                        dropdownColor: Colors.orangeAccent,
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        items: ilceListesi
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(
+                                  e.ilceAdi,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+        },
+      ),
+    );
   }
 }

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/servisler.dart';
 
-class TestEkrani extends StatefulWidget {
+class FirmalarEkrani extends StatefulWidget {
   String kategoriAdi;
   int kategoriID;
   Future<List<Iller>> ilListesi;
 
-  TestEkrani({this.kategoriAdi, this.kategoriID, this.ilListesi});
+  FirmalarEkrani({this.kategoriAdi, this.kategoriID, this.ilListesi});
   @override
-  _TestEkraniState createState() => _TestEkraniState();
+  _FirmalarEkraniState createState() => _FirmalarEkraniState();
 }
 
-class _TestEkraniState extends State<TestEkrani> {
+class _FirmalarEkraniState extends State<FirmalarEkrani> {
   int il_no;
   List<Iller> ilListesi = <Iller>[];
   List<Ilceler> ilceListesi = <Ilceler>[];

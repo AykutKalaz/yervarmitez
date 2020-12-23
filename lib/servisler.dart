@@ -4,8 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 import 'components/kategoriOlusturucu.dart';
-
-int il_no = 1;
+import 'ilceler.dart';
+import 'iller.dart';
+import 'kategori.dart';
 
 KayitBilgiGonder(String musteriMail, String musteriAdi, String musteriSoyadi,
     String musteriTelefon, String musteriSifre) async {
@@ -75,7 +76,7 @@ Future<List<Iller>> ilGetir() async {
   return illerListe;
 }
 
-Future<List<Ilceler>> ilceGetir(il_no) async {
+Future<List<Ilceler>> ilceGetir(int il_no) async {
   List<Ilceler> ilcelerListe = [];
   http.Response response = await http.post(
     'http://burkayarac.com.tr/yervarmi/api/ilce-listele.php/',
@@ -95,33 +96,40 @@ Future<List<Ilceler>> ilceGetir(il_no) async {
   return ilcelerListe;
 }
 
-class Iller {
-  int ilID;
-  String ilAdi;
-
-  Iller({
-    this.ilAdi,
-    this.ilID,
+Future<List<Firma>> firmaGetir(int ilce_no, int KategoriID) async {
+  List<Firma> firmalar = [];
+  http.Response response = await http
+      .post('http://burkayarac.com.tr/yervarmi/api/firma-listele.php/', body: {
+    "ilce_no": ilce_no.toString(),
+    "KategoriID": KategoriID.toString(),
   });
+  var firmaListe = [];
+  String mesaj = "";
+  mesaj = jsonDecode(response.body)["message"];
+  if (mesaj == "Firma bulunamadı.") {
+    print("boş değer döndü.");
+  } else {
+    firmaListe = jsonDecode(response.body)["FirmaData"];
+    for (int i = 0; i < firmaListe.length; i++) {
+      firmalar.add(
+        new Firma(
+            firmaAdi: firmaListe[i]["FirmaAd"],
+            firmaAdres: firmaListe[i]["FirmaAdres"],
+            firmaLogo: firmaListe[i]["FirmaLogo"]),
+      );
+    }
+  }
+  return firmalar;
 }
 
-class Ilceler extends Iller {
-  int ilceID;
-  String ilceAdi;
-  Ilceler({
-    this.ilceAdi,
-    this.ilceID,
-  });
-}
-
-class Kategori {
-  String kategoriAdi;
-  String kategoriResmi;
-  int kategoriID;
-
-  Kategori({
-    this.kategoriAdi,
-    this.kategoriResmi,
-    this.kategoriID,
+class Firma {
+  int firmaID;
+  String firmaAdi;
+  String firmaAdres;
+  String firmaLogo;
+  Firma({
+    this.firmaAdi,
+    this.firmaLogo,
+    this.firmaAdres,
   });
 }

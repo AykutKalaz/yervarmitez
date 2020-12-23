@@ -3,6 +3,8 @@ import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/firmalarEkrani.dart';
 import 'package:yervarmitez/servisler.dart';
 
+import '../iller.dart';
+
 class KategoriOlustur extends StatelessWidget {
   const KategoriOlustur({
     Key key,

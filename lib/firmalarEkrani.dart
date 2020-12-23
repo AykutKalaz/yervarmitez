@@ -1,7 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:yervarmitez/constants.dart';
+import 'package:yervarmitez/profil.dart';
 import 'package:yervarmitez/servisler.dart';
+
+import 'ekranlar/kategoriler/body.dart';
+import 'ilceler.dart';
+import 'iller.dart';
 
 class FirmalarEkrani extends StatefulWidget {
   String kategoriAdi;
@@ -17,9 +22,35 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
   int il_no;
   List<Iller> ilListesi = <Iller>[];
   List<Ilceler> ilceListesi = <Ilceler>[];
+  List<Firma> firmaListesi = <Firma>[];
   Iller seciliIl;
   Ilceler seciliIlce;
+  List<Widget> firmalar = [];
   Future<void> _initForm;
+
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      if (context.widget == KategoriEkrani()) {
+        return null;
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return KategoriEkrani();
+          }),
+        );
+      }
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) {
+          return ProfilEkrani();
+        }),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -32,7 +63,7 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
     ilListesi.addAll(await widget.ilListesi);
   }
 
-  void _onIlSelected(Iller seciliIl) async {
+  Future<void> _onIlSelected(Iller seciliIl) async {
     try {
       final cityList = await ilceGetir(seciliIl.ilID);
       setState(() {
@@ -44,6 +75,40 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
     } catch (e) {
       //TODO: handle error
       rethrow;
+    }
+  }
+
+  Future<void> _onIlceSelected(Ilceler seciliIlce) async {
+    try {
+      final firmaList = await firmaGetir(seciliIlce.ilceID, widget.kategoriID);
+      setState(() {
+        firmaListesi.clear();
+        if (seciliIlce.ilceID != null) {
+          firmaListesi.addAll(firmaList);
+          firmaOlustur(firmaListesi);
+        } else {
+          CircularProgressIndicator();
+        }
+      });
+    } catch (e) {
+      //TODO: handle error
+      rethrow;
+    }
+  }
+
+  firmaOlustur(List<Firma> firmalistesi) {
+    firmalar.clear();
+    for (int i = 0; i < firmalistesi.length; i++) {
+      firmalar.add(
+        Card(
+          color: Colors.orangeAccent,
+          child: ListTile(
+            leading: Image.network(firmaListesi[i].firmaLogo),
+            title: Text(firmaListesi[i].firmaAdi),
+            subtitle: Text(firmaListesi[i].firmaAdres),
+          ),
+        ),
+      );
     }
   }
 
@@ -84,74 +149,108 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
             return _buildError(snapshot.error);
           else
             return SingleChildScrollView(
-              child: Container(
-                color: kPrimaryLightColor,
-                child: Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      DropdownButton<Iller>(
-                        value: seciliIl,
-                        onChanged: _onIlSelected,
-                        dropdownColor: Colors.orangeAccent,
-                        underline: Container(
-                          height: 2,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                        items: ilListesi
-                            .map(
-                              (e) => DropdownMenuItem(
-                                child: Text(
-                                  e.ilAdi,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    color: kPrimaryLightColor,
+                    child: Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          DropdownButton<Iller>(
+                            value: seciliIl,
+                            onChanged: _onIlSelected,
+                            dropdownColor: Colors.orangeAccent,
+                            underline: Container(
+                              height: 2,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                            items: ilListesi
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    child: Text(
+                                      e.ilAdi,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    value: e,
                                   ),
-                                ),
-                                value: e,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      DropdownButton<Ilceler>(
-                        value: seciliIlce,
-                        onChanged: (Ilceler selectedIlce) {
-                          setState(() {
-                            this.seciliIlce = selectedIlce;
-                          });
-                        },
-                        dropdownColor: Colors.orangeAccent,
-                        underline: Container(
-                          height: 2,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                        items: ilceListesi
-                            .map(
-                              (e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(
-                                  e.ilceAdi,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                )
+                                .toList(),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          DropdownButton<Ilceler>(
+                            value: seciliIlce,
+                            onChanged: (Ilceler selectedIlce) {
+                              setState(() {
+                                this.seciliIlce = selectedIlce;
+                                _onIlceSelected(seciliIlce);
+                              });
+                            },
+                            dropdownColor: Colors.orangeAccent,
+                            underline: Container(
+                              height: 2,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                            items: ilceListesi
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      e.ilceAdi,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )
-                            .toList(),
+                                )
+                                .toList(),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ]..addAll(
+                    List.generate(firmalar.length, (index) {
+                      return firmalar[index];
+                    }),
+                  ),
               ),
             );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: kPrimaryColor,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home,
+              size: 35,
+            ),
+            title: Text('Ana Sayfa'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.person,
+              size: 35,
+            ),
+            title: Text(
+              'Profil',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber,
+        onTap: _onItemTapped,
       ),
     );
   }

@@ -113,6 +113,7 @@ Future<List<Firma>> firmaGetir(int ilce_no, int KategoriID) async {
     for (int i = 0; i < firmaListe.length; i++) {
       firmalar.add(
         new Firma(
+            firmaID: int.parse(firmaListe[i]["FirmaID"]),
             firmaAdi: firmaListe[i]["FirmaAd"],
             firmaAdres: firmaListe[i]["FirmaAdres"],
             firmaLogo: firmaListe[i]["FirmaLogo"]),
@@ -128,6 +129,7 @@ class Firma {
   String firmaAdres;
   String firmaLogo;
   Firma({
+    this.firmaID,
     this.firmaAdi,
     this.firmaLogo,
     this.firmaAdres,

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:yervarmitez/constants.dart';
+import 'package:yervarmitez/ekranlar/firmaDetay/firmaDetayEkrani.dart';
 import 'package:yervarmitez/profil.dart';
 import 'package:yervarmitez/servisler.dart';
 
@@ -63,10 +64,17 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
     ilListesi.addAll(await widget.ilListesi);
   }
 
+  void firmaTemizle() {
+    setState(() {
+      firmaListesi.clear();
+    });
+  }
+
   Future<void> _onIlSelected(Iller seciliIl) async {
     try {
       final cityList = await ilceGetir(seciliIl.ilID);
       setState(() {
+        firmaListesi.clear();
         this.seciliIl = seciliIl;
         seciliIlce = null;
         ilceListesi.clear();
@@ -102,10 +110,16 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
       firmalar.add(
         Card(
           color: Colors.orangeAccent,
-          child: ListTile(
-            leading: Image.network(firmaListesi[i].firmaLogo),
-            title: Text(firmaListesi[i].firmaAdi),
-            subtitle: Text(firmaListesi[i].firmaAdres),
+          child: GestureDetector(
+            onTap: () {
+              print("tıklandı");
+              firmaDetaylari(firmalistesi[i]);
+            },
+            child: ListTile(
+              leading: Image.network(firmaListesi[i].firmaLogo),
+              title: Text(firmaListesi[i].firmaAdi),
+              subtitle: Text(firmaListesi[i].firmaAdres),
+            ),
           ),
         ),
       );
@@ -220,7 +234,11 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
                   ),
                 ]..addAll(
                     List.generate(firmalar.length, (index) {
-                      return firmalar[index];
+                      if (firmalar.length == 0) {
+                        return CircularProgressIndicator();
+                      } else {
+                        return firmalar[index];
+                      }
                     }),
                   ),
               ),
@@ -252,6 +270,19 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
         selectedItemColor: Colors.amber,
         onTap: _onItemTapped,
       ),
+    );
+  }
+
+  firmaDetaylari(Firma firma) {
+    return Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return FirmaDetayEkrani(
+          firmaID: firma.firmaID,
+          firmaAdi: firma.firmaAdi,
+          firmaLogo: firma.firmaLogo,
+        );
+      }),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:yervarmitez/firmaDetayJsonParse.dart';
 
 import 'components/kategoriOlusturucu.dart';
 import 'ilceler.dart';
@@ -46,6 +47,7 @@ Future<List<Widget>> KategoriBilgiGetir() async {
         kategoriID: int.parse(kategoriListe[i]["KategoriID"].toString()),
         kategoriAdi: kategoriListe[i]["KategoriAdi"].toString(),
         kategoriResmi: kategoriListe[i]["KategoriResim"].toString()));
+    print(kategoriListe[i]["KategoriAdi"].toString());
   }
   for (int i = 0; i < kategoriSinif.length; i++) {
     kategori.add(KategoriOlustur(
@@ -53,7 +55,6 @@ Future<List<Widget>> KategoriBilgiGetir() async {
       kategoriResmi: kategoriSinif[i].kategoriResmi,
       kategoriAdi: kategoriSinif[i].kategoriAdi,
     ));
-    print(kategori.length);
   }
   print(kategori.length);
   return kategori;
@@ -118,9 +119,21 @@ Future<List<Firma>> firmaGetir(int ilce_no, int KategoriID) async {
             firmaAdres: firmaListe[i]["FirmaAdres"],
             firmaLogo: firmaListe[i]["FirmaLogo"]),
       );
+      print(firmaListe[i]["FirmaLogo"].toString());
     }
   }
   return firmalar;
+}
+
+Future<FirmaHakkinda> firmaDetayGetir(int firmaID) async {
+  http.Response response = await http.post(
+    "http://burkayarac.com.tr/yervarmi/api/firma-detay.php",
+    body: {
+      "firmaID": firmaID.toString(),
+    },
+  );
+  final FirmaHakkinda firmaDetay = welcomeFromJson(response.body);
+  return firmaDetay;
 }
 
 class Firma {
@@ -133,5 +146,29 @@ class Firma {
     this.firmaAdi,
     this.firmaLogo,
     this.firmaAdres,
+  });
+}
+
+class FirmaDetay extends Firma {
+  String firmaMail;
+  String firmaTelefon;
+  FirmaDetay({
+    this.firmaMail,
+    this.firmaTelefon,
+  });
+}
+
+class Kroki extends FirmaDetay {
+  int krokiAdet;
+  List<String> krokiResim = [];
+  int masaAdet;
+  int krokiBirimFiyat;
+  int krokiBirimSaat;
+  Kroki({
+    this.krokiAdet,
+    this.krokiResim,
+    this.masaAdet,
+    this.krokiBirimFiyat,
+    this.krokiBirimSaat,
   });
 }

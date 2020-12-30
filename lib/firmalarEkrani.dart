@@ -6,6 +6,7 @@ import 'package:yervarmitez/profil.dart';
 import 'package:yervarmitez/servisler.dart';
 
 import 'ekranlar/kategoriler/body.dart';
+import 'firmaDetayJsonParse.dart';
 import 'ilceler.dart';
 import 'iller.dart';
 
@@ -30,6 +31,7 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
   Future<void> _initForm;
 
   int _selectedIndex = 0;
+  Future<FirmaHakkinda> firmaDetails;
 
   void _onItemTapped(int index) {
     if (index == 0) {
@@ -64,17 +66,11 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
     ilListesi.addAll(await widget.ilListesi);
   }
 
-  void firmaTemizle() {
-    setState(() {
-      firmaListesi.clear();
-    });
-  }
-
   Future<void> _onIlSelected(Iller seciliIl) async {
     try {
       final cityList = await ilceGetir(seciliIl.ilID);
       setState(() {
-        firmaListesi.clear();
+        firmalar.clear();
         this.seciliIl = seciliIl;
         seciliIlce = null;
         ilceListesi.clear();
@@ -112,7 +108,9 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
           color: Colors.orangeAccent,
           child: GestureDetector(
             onTap: () {
+              firmaDetayGetir(firmalistesi[i].firmaID);
               print("tıklandı");
+
               firmaDetaylari(firmalistesi[i]);
             },
             child: ListTile(

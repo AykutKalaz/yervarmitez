@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:yervarmitez/firmaDetayJsonParse.dart';
+import 'package:yervarmitez/masaDetayJsonParse.dart';
 
 import 'components/kategoriOlusturucu.dart';
 import 'ilceler.dart';
@@ -134,6 +135,20 @@ Future<FirmaHakkinda> firmaDetayGetir(int firmaID) async {
   );
   final FirmaHakkinda firmaDetay = welcomeFromJson(response.body);
   return firmaDetay;
+}
+
+Future<MasaHakkinda> masaBilgiGetir(
+    int firmaID, String masaID, String tarih) async {
+  http.Response response = await http.post(
+    "http://burkayarac.com.tr/yervarmi/api/masa-saat-listele.php",
+    body: {
+      "firmaID": firmaID.toString(),
+      "masaID": masaID,
+      "Tarih": tarih,
+    },
+  );
+  final MasaHakkinda masaDetay = masaFromJson(response.body);
+  return masaDetay;
 }
 
 class Firma {

@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/ekranlar/firmaDetay/firmaDetayEkrani.dart';
 import 'package:yervarmitez/profil.dart';
@@ -9,6 +11,7 @@ import 'ekranlar/kategoriler/body.dart';
 import 'firmaDetayJsonParse.dart';
 import 'ilceler.dart';
 import 'iller.dart';
+import 'masaDetayJsonParse.dart';
 
 class FirmalarEkrani extends StatefulWidget {
   String kategoriAdi;
@@ -110,8 +113,13 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
             onTap: () {
               firmaDetayGetir(firmalistesi[i].firmaID);
               print("tıklandı");
-
-              firmaDetaylari(firmalistesi[i]);
+              Future<FirmaHakkinda> firmaDetay =
+                  firmaDetayGetir(firmalistesi[i].firmaID);
+              Future<MasaHakkinda> masaDetay = masaBilgiGetir(
+                  firmalistesi[i].firmaID,
+                  '1',
+                  DateFormat.yMd('tr_TR').format(DateTime.now()).toString());
+              firmaDetaylari(firmalistesi[i], firmaDetay, masaDetay);
             },
             child: ListTile(
               leading: Image.network(firmaListesi[i].firmaLogo),
@@ -145,6 +153,7 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
       );
     }
 
+    initializeDateFormatting('tr_TR', null);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
@@ -271,7 +280,8 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
     );
   }
 
-  firmaDetaylari(Firma firma) {
+  firmaDetaylari(Firma firma, Future<FirmaHakkinda> firmaDetay,
+      Future<MasaHakkinda> masaDetay) {
     return Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
@@ -279,6 +289,8 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
           firmaID: firma.firmaID,
           firmaAdi: firma.firmaAdi,
           firmaLogo: firma.firmaLogo,
+          masaDetaylari: masaDetay,
+          firmaDetaylari: firmaDetay,
         );
       }),
     );

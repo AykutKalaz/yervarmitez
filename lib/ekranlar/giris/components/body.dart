@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yervarmitez/components/roundedButton.dart';
 import 'package:yervarmitez/components/roundedInputField.dart';
+import 'package:yervarmitez/components/textFieldContainer.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/ekranlar/kategoriler/body.dart';
 import 'package:yervarmitez/ekranlar/kayit/kayitEkrani.dart';
-
-import 'file:///E:/flutter/yervarmitez/lib/components/roundedParolaField.dart';
 
 import '../../../components/hesapVarMiKontrol.dart';
 import '../../../servisler.dart';
@@ -20,36 +19,8 @@ class _BodyState extends State<Body> {
   String musteriMail = "", musteriSifre = "", ctrl;
   bool checkValue = false;
   SharedPreferences prefs;
-
-  @override
-  void initState() {
-    pageRoute();
-    super.initState();
-  }
-
-  @override
-  void setState(fn) {
-    pageRoute();
-    super.setState(fn);
-  }
-
-  Future<void> pageRoute() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool("userId") == true) {
-      await GirisBilgiGonder(prefs.getString("email"), prefs.getString("sifre"))
-          .then((value) {
-        if (value.toString() == "success") {
-          ctrl = "success";
-          print(ctrl);
-          basariliGiris();
-        } else {
-          ctrl = "false";
-          prefs.setBool("userId", false);
-          print(ctrl);
-        }
-      });
-    }
-  }
+  String musteriID;
+  bool paroleTest = true;
 
   basariliGiris() {
     Future.delayed(Duration(seconds: 2), () {
@@ -57,7 +28,9 @@ class _BodyState extends State<Body> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {
-            return KategoriEkrani();
+            return KategoriEkrani(
+              userID: musteriID,
+            );
           }),
         );
       }
@@ -65,15 +38,11 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> deneme() async {
-    prefs = await SharedPreferences.getInstance();
     await GirisBilgiGonder(musteriMail, musteriSifre).then((value) {
-      if (value.toString() == "success") {
-        prefs.setString("email", musteriMail);
-        prefs.setString("sifre", musteriSifre);
-        prefs.setBool("userId", true);
+      if (value != null) {
+        musteriID = value.toString();
         ctrl = "success";
       } else {
-        prefs.setBool("userId", false);
         ctrl = "false";
       }
     });
@@ -102,15 +71,35 @@ class _BodyState extends State<Body> {
               height: size.height * 0.02,
             ),
             RoundedInputField(
-              hintText: "Your Email",
+              hintText: "isim@ornek.com",
               onChanged: (value) {
                 musteriMail = value;
               },
+              textInputType: TextInputType.emailAddress,
             ),
-            RoundedParolaField(
-              onChanged: (value) {
-                musteriSifre = value;
-              },
+            TextFieldContainer(
+              child: TextField(
+                onChanged: (value) {
+                  musteriSifre = value;
+                },
+                style: TextStyle(fontSize: 19),
+                obscureText: paroleTest,
+                decoration: InputDecoration(
+                  hintText: "Parola",
+                  icon: Icon(
+                    Icons.lock,
+                    color: kPrimaryColor,
+                  ),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    color: kPrimaryColor,
+                    icon: paroleTest
+                        ? Icon(Icons.visibility_off)
+                        : Icon(Icons.visibility),
+                    onPressed: () => setState(() => paroleTest = !paroleTest),
+                  ),
+                ),
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

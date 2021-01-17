@@ -41,33 +41,15 @@ class SaatDatum {
   });
 
   String saat;
-  Durum durum;
+  String durum;
 
   factory SaatDatum.fromJson(Map<String, dynamic> json) => SaatDatum(
         saat: json["Saat"],
-        durum: durumValues.map[json["Durum"]],
+        durum: json["Durum"],
       );
 
   Map<String, dynamic> toJson() => {
         "Saat": saat,
-        "Durum": durumValues.reverse[durum],
+        "Durum": durum,
       };
-}
-
-enum Durum { BO, DOLU }
-
-final durumValues = EnumValues({"Boş": Durum.BO, "Dolu": Durum.DOLU});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    if (reverseMap == null) {
-      reverseMap = map.map((k, v) => new MapEntry(v, k));
-    }
-    return reverseMap;
-  }
 }

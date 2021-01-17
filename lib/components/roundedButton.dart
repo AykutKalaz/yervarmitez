@@ -29,9 +29,7 @@ class RoundedButton extends StatelessWidget {
           color: color,
           child: Text(
             text,
-            style: TextStyle(
-              color: textcolor,
-            ),
+            style: TextStyle(color: textcolor, fontSize: 20),
           ),
         ),
       ),

@@ -16,8 +16,8 @@ class TextFieldContainer extends StatelessWidget {
         horizontal: 20,
         vertical: 5,
       ),
-      width: size.width * 0.8,
-      height: size.height * 0.06,
+      width: size.width * 0.85,
+      height: size.height * 0.08,
       decoration: BoxDecoration(
         color: Colors.orangeAccent,
         borderRadius: BorderRadius.circular(29),

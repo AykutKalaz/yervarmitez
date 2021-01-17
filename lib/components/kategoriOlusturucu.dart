@@ -7,6 +7,7 @@ import '../iller.dart';
 
 class KategoriOlustur extends StatelessWidget {
   const KategoriOlustur({
+    @required this.userID,
     Key key,
     @required this.kategoriResmi,
     @required this.kategoriAdi,
@@ -16,6 +17,7 @@ class KategoriOlustur extends StatelessWidget {
   final String kategoriResmi;
   final String kategoriAdi;
   final int kategoriID;
+  final String userID;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class KategoriOlustur extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) {
             return FirmalarEkrani(
+              userID: userID,
               kategoriAdi: kategoriAdi,
               kategoriID: kategoriID,
               ilListesi: ilListesi,

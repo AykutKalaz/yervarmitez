@@ -3,18 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:yervarmitez/components/hesapVarMiKontrol.dart';
 import 'package:yervarmitez/components/roundedButton.dart';
 import 'package:yervarmitez/components/roundedInputField.dart';
+import 'package:yervarmitez/components/textFieldContainer.dart';
 import 'package:yervarmitez/ekranlar/giris/girisEkrani.dart';
 
-import 'file:///E:/flutter/yervarmitez/lib/components/roundedParolaField.dart';
-
+import '../../../constants.dart';
 import '../../../servisler.dart';
 
-class Body extends StatelessWidget {
+class Body extends StatefulWidget {
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
   String musteriMail = "",
       musteriAdi = "",
       musteriSoyadi = "",
       musteriTelefon = "",
       musteriSifre = "";
+  bool paroleTest = false;
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -30,16 +37,44 @@ class Body extends StatelessWidget {
             SizedBox(
               height: size.height * 0.02,
             ),
-            RoundedInputField(
-              hintText: "Email",
-              onChanged: (value) {
-                musteriMail = value;
-              },
+            Text(
+              "Kayıt Ekranı",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            RoundedParolaField(
-              onChanged: (value) {
-                musteriSifre = value;
-              },
+            SizedBox(
+              height: size.height * 0.02,
+            ),
+            RoundedInputField(
+                hintText: "isim@ornek.com",
+                onChanged: (value) {
+                  musteriMail = value;
+                },
+                textInputType: TextInputType.emailAddress),
+            TextFieldContainer(
+              child: TextField(
+                onChanged: (value) {
+                  musteriSifre = value;
+                  print(musteriSifre);
+                  print(value);
+                },
+                style: TextStyle(fontSize: 19),
+                obscureText: paroleTest,
+                decoration: InputDecoration(
+                  hintText: "Parola",
+                  icon: Icon(
+                    Icons.lock,
+                    color: kPrimaryColor,
+                  ),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    color: kPrimaryColor,
+                    icon: paroleTest
+                        ? Icon(Icons.visibility_off)
+                        : Icon(Icons.visibility),
+                    onPressed: () => setState(() => paroleTest = !paroleTest),
+                  ),
+                ),
+              ),
             ),
             RoundedInputField(
               hintText: "İsim",
@@ -70,7 +105,7 @@ class Body extends StatelessWidget {
               },
             ),
             SizedBox(
-              height: size.height * 0.04,
+              height: size.height * 0.005,
             ),
             HesapVarMiKontrolSatiri(
               giris: false,

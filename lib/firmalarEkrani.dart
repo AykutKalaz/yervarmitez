@@ -4,21 +4,20 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/ekranlar/firmaDetay/firmaDetayEkrani.dart';
-import 'package:yervarmitez/profil.dart';
 import 'package:yervarmitez/servisler.dart';
 
-import 'ekranlar/kategoriler/body.dart';
 import 'firmaDetayJsonParse.dart';
 import 'ilceler.dart';
 import 'iller.dart';
 import 'masaDetayJsonParse.dart';
 
 class FirmalarEkrani extends StatefulWidget {
-  String kategoriAdi;
+  String kategoriAdi, userID;
   int kategoriID;
   Future<List<Iller>> ilListesi;
 
-  FirmalarEkrani({this.kategoriAdi, this.kategoriID, this.ilListesi});
+  FirmalarEkrani(
+      {this.kategoriAdi, this.kategoriID, this.ilListesi, this.userID});
   @override
   _FirmalarEkraniState createState() => _FirmalarEkraniState();
 }
@@ -31,43 +30,8 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
   Iller seciliIl;
   Ilceler seciliIlce;
   List<Widget> firmalar = [];
-  Future<void> _initForm;
 
-  int _selectedIndex = 0;
   Future<FirmaHakkinda> firmaDetails;
-
-  void _onItemTapped(int index) {
-    if (index == 0) {
-      if (context.widget == KategoriEkrani()) {
-        return null;
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return KategoriEkrani();
-          }),
-        );
-      }
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) {
-          return ProfilEkrani();
-        }),
-      );
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initForm = _initStateAsync();
-  }
-
-  Future<void> _initStateAsync() async {
-    ilListesi.clear();
-    ilListesi.addAll(await widget.ilListesi);
-  }
 
   Future<void> _onIlSelected(Iller seciliIl) async {
     try {
@@ -113,9 +77,9 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
             onTap: () {
               firmaDetayGetir(firmalistesi[i].firmaID);
               print("tıklandı");
-              Future<FirmaHakkinda> firmaDetay =
+              final Future<FirmaHakkinda> firmaDetay =
                   firmaDetayGetir(firmalistesi[i].firmaID);
-              Future<MasaHakkinda> masaDetay = masaBilgiGetir(
+              final Future<MasaHakkinda> masaDetay = masaBilgiGetir(
                   firmalistesi[i].firmaID,
                   '1',
                   DateFormat.yMd('tr_TR').format(DateTime.now()).toString());
@@ -124,7 +88,8 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
             child: ListTile(
               leading: Image.network(firmaListesi[i].firmaLogo),
               title: Text(firmaListesi[i].firmaAdi),
-              subtitle: Text(firmaListesi[i].firmaAdres),
+              subtitle: Text(firmaListesi[i].firmaAdres +
+                  "\nFirma Puanı: ${firmalistesi[i].firmaPuan}"),
             ),
           ),
         ),
@@ -162,13 +127,11 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
         ),
       ),
       body: FutureBuilder<void>(
-        future: _initForm,
+        future: widget.ilListesi,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
-            return _buildLoading();
-          else if (snapshot.hasError)
-            return _buildError(snapshot.error);
-          else
+          if (snapshot.hasData) {
+            ilListesi = snapshot.data as List<Iller>;
+
             return SingleChildScrollView(
               child: Column(
                 children: <Widget>[
@@ -250,32 +213,12 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
                   ),
               ),
             );
+          } else if (snapshot.hasError) {
+            return _buildError(snapshot.error);
+          } else {
+            return _buildLoading();
+          }
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: kPrimaryColor,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              size: 35,
-            ),
-            title: Text('Ana Sayfa'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              size: 35,
-            ),
-            title: Text(
-              'Profil',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber,
-        onTap: _onItemTapped,
       ),
     );
   }
@@ -286,6 +229,7 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
       context,
       MaterialPageRoute(builder: (context) {
         return FirmaDetayEkrani(
+          userID: widget.userID,
           firmaID: firma.firmaID,
           firmaAdi: firma.firmaAdi,
           firmaLogo: firma.firmaLogo,

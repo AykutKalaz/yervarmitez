@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-FirmaHakkinda welcomeFromJson(String str) =>
+FirmaHakkinda firmaFromJson(String str) =>
     FirmaHakkinda.fromJson(json.decode(str));
 
 String welcomeToJson(FirmaHakkinda data) => json.encode(data.toJson());
@@ -48,6 +48,10 @@ class FirmaDetay {
     this.ilNo,
     this.kategoriId,
     this.krokiler,
+    this.firmaMesaiBas,
+    this.firmaMesaiBit,
+    this.firmaPuan,
+    this.yorumlar,
   });
 
   String firmaId;
@@ -62,10 +66,15 @@ class FirmaDetay {
   String ilceNo;
   String ilNo;
   String kategoriId;
+  String firmaMesaiBas;
+  String firmaMesaiBit;
   List<Krokiler> krokiler;
+  List<Yorumlar> yorumlar;
+  String firmaPuan;
 
   factory FirmaDetay.fromJson(Map<String, dynamic> json) => FirmaDetay(
         firmaId: json["FirmaID"],
+        firmaPuan: json["FirmaPuan"].toString(),
         firmaAd: json["FirmaAd"],
         firmaSifre: json["FirmaSifre"],
         firmaEmail: json["FirmaEmail"],
@@ -77,8 +86,12 @@ class FirmaDetay {
         ilceNo: json["ilce_no"],
         ilNo: json["il_no"],
         kategoriId: json["KategoriID"],
+        firmaMesaiBas: json["MesaiBaslangicSaati"],
+        firmaMesaiBit: json["MesaiBitisSaati"],
         krokiler: List<Krokiler>.from(
             json["krokiler"].map((x) => Krokiler.fromJson(x))),
+        yorumlar: List<Yorumlar>.from(
+            json["yorumlar"].map((x) => Yorumlar.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -94,7 +107,54 @@ class FirmaDetay {
         "ilce_no": ilceNo,
         "il_no": ilNo,
         "KategoriID": kategoriId,
+        "MesaiBitisSaati": firmaMesaiBit,
+        "MesaiBaslangicSaati": firmaMesaiBas,
+        "FirmaPuan": firmaPuan,
+        "yorumlar": List<dynamic>.from(yorumlar.map((e) => e.topJson())),
         "krokiler": List<dynamic>.from(krokiler.map((x) => x.toJson())),
+      };
+}
+
+class Yorumlar {
+  String musteriAd;
+  String yorumIcerik;
+  String yorumPuan;
+  String yorumTarih;
+  String musteriID;
+  String yorumID;
+  String firmaID;
+  String rezervasyonID;
+  Yorumlar({
+    this.musteriAd,
+    this.yorumIcerik,
+    this.yorumPuan,
+    this.yorumTarih,
+    this.musteriID,
+    this.yorumID,
+    this.firmaID,
+    this.rezervasyonID,
+  });
+
+  factory Yorumlar.fromJson(Map<String, dynamic> json) => Yorumlar(
+        yorumTarih: json["YorumTarih"],
+        yorumPuan: json["YorumPuan"],
+        yorumIcerik: json["YorumIcerik"],
+        musteriAd: json["MusteriAd"],
+        rezervasyonID: json["RezervasyonID"],
+        firmaID: json["FirmaID"],
+        yorumID: json["YorumID"],
+        musteriID: json["MusteriID"],
+      );
+
+  Map<String, dynamic> topJson() => {
+        "YorumTarih": yorumTarih,
+        "YorumPuan": yorumPuan,
+        "YorumIcerik": yorumIcerik,
+        "MusteriAd": musteriAd,
+        "RezervasyonID": rezervasyonID,
+        "FirmaID": firmaID,
+        "YorumID": yorumID,
+        "MusteriID": musteriID,
       };
 }
 

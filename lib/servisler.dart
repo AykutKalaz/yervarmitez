@@ -1,9 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yervarmitez/firmaDetayJsonParse.dart';
 import 'package:yervarmitez/masaDetayJsonParse.dart';
+import 'package:yervarmitez/profilDetayJsonParse.dart';
+import 'package:yervarmitez/rezDetayJsonParse.dart';
+import 'package:yervarmitez/rezDetayOlustur.dart';
 
 import 'components/kategoriOlusturucu.dart';
 import 'ilceler.dart';
@@ -20,8 +24,6 @@ KayitBilgiGonder(String musteriMail, String musteriAdi, String musteriSoyadi,
     "MusteriSifre": musteriSifre,
     "MusteriTelefon": musteriTelefon
   });
-  print(jsonDecode(response.body));
-  print("Status: " + (response.statusCode).toString());
 }
 
 Future<String> GirisBilgiGonder(String musteriMail, String musteriSifre) async {
@@ -30,13 +32,11 @@ Future<String> GirisBilgiGonder(String musteriMail, String musteriSifre) async {
     "MusteriEmail": musteriMail,
     "MusteriSifre": musteriSifre,
   });
-  String test = jsonDecode(response.body)["status"];
-  print(jsonDecode(response.body));
-  print("Status: " + (response.statusCode).toString() + musteriMail);
-  return test;
+  String musteriID = jsonDecode(response.body)["userInfo"];
+  return musteriID;
 }
 
-Future<List<Widget>> KategoriBilgiGetir() async {
+Future<List<Widget>> KategoriBilgiGetir(String userID) async {
   List<Widget> kategori = [];
   List<Kategori> kategoriSinif = [];
   http.Response response = await http
@@ -48,16 +48,15 @@ Future<List<Widget>> KategoriBilgiGetir() async {
         kategoriID: int.parse(kategoriListe[i]["KategoriID"].toString()),
         kategoriAdi: kategoriListe[i]["KategoriAdi"].toString(),
         kategoriResmi: kategoriListe[i]["KategoriResim"].toString()));
-    print(kategoriListe[i]["KategoriAdi"].toString());
   }
   for (int i = 0; i < kategoriSinif.length; i++) {
     kategori.add(KategoriOlustur(
+      userID: userID,
       kategoriID: kategoriSinif[i].kategoriID,
       kategoriResmi: kategoriSinif[i].kategoriResmi,
       kategoriAdi: kategoriSinif[i].kategoriAdi,
     ));
   }
-  print(kategori.length);
   return kategori;
 }
 
@@ -115,12 +114,13 @@ Future<List<Firma>> firmaGetir(int ilce_no, int KategoriID) async {
     for (int i = 0; i < firmaListe.length; i++) {
       firmalar.add(
         new Firma(
-            firmaID: int.parse(firmaListe[i]["FirmaID"]),
-            firmaAdi: firmaListe[i]["FirmaAd"],
-            firmaAdres: firmaListe[i]["FirmaAdres"],
-            firmaLogo: firmaListe[i]["FirmaLogo"]),
+          firmaID: int.parse(firmaListe[i]["FirmaID"]),
+          firmaAdi: firmaListe[i]["FirmaAd"],
+          firmaAdres: firmaListe[i]["FirmaAdres"],
+          firmaLogo: firmaListe[i]["FirmaLogo"],
+          firmaPuan: firmaListe[i]["FirmaPuan"].toString(),
+        ),
       );
-      print(firmaListe[i]["FirmaLogo"].toString());
     }
   }
   return firmalar;
@@ -133,7 +133,7 @@ Future<FirmaHakkinda> firmaDetayGetir(int firmaID) async {
       "firmaID": firmaID.toString(),
     },
   );
-  final FirmaHakkinda firmaDetay = welcomeFromJson(response.body);
+  final FirmaHakkinda firmaDetay = firmaFromJson(response.body);
   return firmaDetay;
 }
 
@@ -151,16 +151,133 @@ Future<MasaHakkinda> masaBilgiGetir(
   return masaDetay;
 }
 
+Future<ProfilDetay> profilDetayGetir(String musteriID) async {
+  http.Response response = await http.post(
+    "https://burkayarac.com.tr/yervarmi/api/profil-detay.php",
+    body: {
+      "MusteriID": musteriID,
+    },
+  );
+  final ProfilDetay profilDetay = profilFromJson(response.body);
+  return profilDetay;
+}
+
+Future<String> profilBilgiGuncelle(
+    String musteriMail,
+    String musteriAdi,
+    String musteriSoyadi,
+    String musteriTelefon,
+    String musteriSifre,
+    String musteriID) async {
+  http.Response response = await http.post(
+      'https://burkayarac.com.tr/yervarmi/api/profil-guncelle.php',
+      body: {
+        "MusteriID": musteriID,
+        "MusteriEmail": musteriMail,
+        "MusteriAd": musteriAdi,
+        "MusteriSoyad": musteriSoyadi,
+        "MusteriSifre": musteriSifre,
+        "MusteriTelefon": musteriTelefon
+      });
+  String Mesaj = jsonDecode(response.body)["message"];
+  return Mesaj;
+}
+
+Future<String> rezervasyonTamamla(
+  String masaID,
+  String tarih,
+  String basSaati,
+  String bitSaati,
+  String musteriID,
+) async {
+  http.Response response = await http.post(
+      "http://www.burkayarac.com.tr/yervarmi/api/rezervasyon-ekle.php",
+      body: {
+        "Tarih": tarih,
+        "BaslangicSaat": basSaati,
+        "BitisSaat": bitSaati,
+        "MusteriID": musteriID,
+        "MasaID": masaID,
+      });
+  String mesaj = jsonDecode(response.body)["message"];
+  return mesaj;
+}
+
+Future<List<Widget>> rezervasyonGetir(String durumID, String userID) async {
+  List<Widget> rezervasyonlar = [];
+  http.Response response = await http.post(
+      "http://www.burkayarac.com.tr/yervarmi/api/rezervasyon-listele.php",
+      body: {
+        "DurumID": durumID,
+        "MusteriID": userID,
+      });
+  var mesaj = jsonDecode(response.body);
+  if (mesaj["message"] == "Başarı ile rezervasyonlar listelendi.") {
+    for (int i = 0; i < mesaj["RezervasyonData"].length; i++) {
+      rezervasyonlar.add(rezDetayOlusturucu(
+        resim: mesaj["RezervasyonData"][i]["FirmaLogo"].toString(),
+        firmaAdi: mesaj["RezervasyonData"][i]["FirmaAd"].toString(),
+        rezBas:
+            mesaj["RezervasyonData"][i]["RezervasyonBaslangicTarih"].toString(),
+        rezBit: mesaj["RezervasyonData"][i]["RezervasyonBitisTarih"].toString(),
+        rezID: mesaj["RezervasyonData"][i]["RezervasyonID"].toString(),
+        masaNo: mesaj["RezervasyonData"][i]["MasaNo"].toString(),
+        rezDurum: durumID,
+      ));
+    }
+    return rezervasyonlar;
+  } else if (mesaj["message"] == "Rezervasyon Bulunamadı") {
+    return null;
+  }
+}
+
+Future<RezDetay> rezDetayGetir(String rezID) async {
+  http.Response response = await http.post(
+    "http://burkayarac.com.tr/yervarmi/api/rezervasyon-detay.php",
+    body: {
+      "RezervasyonID": rezID,
+    },
+  );
+  final RezDetay rezDetaylari = RezFromJson(response.body);
+  return rezDetaylari;
+}
+
+Future<String> rezYorumGonder(String rezID, String yorum, String puan) async {
+  http.Response response = await http.post(
+    "http://burkayarac.com.tr/yervarmi/api/yorum-ekle.php",
+    body: {
+      "RezervasyonID": rezID,
+      "YorumIcerik": yorum,
+      "YorumPuan": puan,
+    },
+  );
+  String mesaj = jsonDecode(response.body)["message"];
+  return mesaj;
+}
+
+Future<String> rezIptalEt(String rezID) async {
+  http.Response response = await http.post(
+    "http://burkayarac.com.tr/yervarmi/api/rezervasyon-iptal.php",
+    body: {
+      "RezervasyonID": rezID,
+    },
+  );
+  String mesaj = jsonDecode(response.body)["message"];
+  return mesaj;
+}
+
 class Firma {
   int firmaID;
   String firmaAdi;
   String firmaAdres;
   String firmaLogo;
+  String firmaPuan;
   Firma({
     this.firmaID,
     this.firmaAdi,
     this.firmaLogo,
     this.firmaAdres,
+    this.firmaPuan,
   });
 }
 

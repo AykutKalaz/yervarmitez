@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yervarmitez/components/roundedButton.dart';
 import 'package:yervarmitez/components/roundedInputField.dart';
 import 'package:yervarmitez/components/textFieldContainer.dart';
@@ -18,23 +17,142 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   String musteriMail = "", musteriSifre = "", ctrl;
   bool checkValue = false;
-  SharedPreferences prefs;
   String musteriID;
   bool paroleTest = true;
 
   basariliGiris() {
-    Future.delayed(Duration(seconds: 2), () {
-      if (ctrl == "success") {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return KategoriEkrani(
-              userID: musteriID,
-            );
-          }),
-        );
-      }
-    });
+    if (ctrl == "success") {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              'Giriş Bilgilendirme',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(
+                    'Giriş başarılı. 2 saniye içinde yönlendiriliyorsunuz',
+                    style: TextStyle(
+                      fontSize: 23,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              Container(
+                child: RoundedButton(
+                  text: "Tamam",
+                  press: () {
+                    Navigator.of(context).pop();
+                  },
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      Future.delayed(Duration(seconds: 2), () {
+        {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return KategoriEkrani(
+                userID: musteriID,
+              );
+            }),
+          );
+        }
+      });
+    } else if (ctrl == "false") {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              'Giriş Bilgilendirme',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(
+                    'Email yada şifre yanlış. Lütfen tekrar deneyiniz.',
+                    style: TextStyle(
+                      fontSize: 23,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              Container(
+                child: RoundedButton(
+                  text: "Tamam",
+                  press: () {
+                    Navigator.of(context).pop();
+                  },
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (ctrl == "null") {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              'Giriş Bilgilendirme',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(
+                    'Email yada şifre boş bırakılamaz.',
+                    style: TextStyle(
+                      fontSize: 23,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              Container(
+                child: RoundedButton(
+                  text: "Tamam",
+                  press: () {
+                    Navigator.of(context).pop();
+                  },
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return CircularProgressIndicator();
+    }
   }
 
   Future<void> deneme() async {
@@ -101,26 +219,16 @@ class _BodyState extends State<Body> {
                 ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Checkbox(
-                  value: checkValue,
-                  onChanged: (bool value) {
-                    setState(() {
-                      checkValue = value;
-                    });
-                  },
-                  activeColor: kPrimaryColor,
-                ),
-                Text("Bilgileri kaydetmek için tıklayın"),
-              ],
-            ),
             RoundedButton(
               text: "Giriş Yap",
               press: () {
-                deneme();
-                basariliGiris();
+                if (musteriMail == "" || musteriSifre == "") {
+                  ctrl = "null";
+                  basariliGiris();
+                } else {
+                  deneme();
+                  basariliGiris();
+                }
               },
             ),
             SizedBox(

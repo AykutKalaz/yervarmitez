@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:yervarmitez/constants.dart';
-import 'package:yervarmitez/ekranlar/firmaDetay/firmaDetayEkrani.dart';
+import 'package:yervarmitez/ekranlar/firma/firmaDetayEkrani.dart';
 import 'package:yervarmitez/servisler.dart';
 
 import 'firmaDetayJsonParse.dart';

@@ -6,16 +6,17 @@ import 'package:http/http.dart' as http;
 import 'package:yervarmitez/firmaDetayJsonParse.dart';
 import 'package:yervarmitez/masaDetayJsonParse.dart';
 import 'package:yervarmitez/profilDetayJsonParse.dart';
-import 'package:yervarmitez/rezDetayJsonParse.dart';
-import 'package:yervarmitez/rezDetayOlustur.dart';
+
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezDetayJsonParse.dart';
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezDetayOlustur.dart';
 
 import 'components/kategoriOlusturucu.dart';
+import 'ekranlar/kategoriler/kategori.dart';
 import 'ilceler.dart';
 import 'iller.dart';
-import 'kategori.dart';
 
-KayitBilgiGonder(String musteriMail, String musteriAdi, String musteriSoyadi,
-    String musteriTelefon, String musteriSifre) async {
+Future<String> KayitBilgiGonder(String musteriMail, String musteriAdi,
+    String musteriSoyadi, String musteriTelefon, String musteriSifre) async {
   http.Response response = await http
       .post('http://www.burkayarac.com.tr/yervarmi/api/kayit-ol.php', body: {
     "MusteriEmail": musteriMail,
@@ -24,6 +25,8 @@ KayitBilgiGonder(String musteriMail, String musteriAdi, String musteriSoyadi,
     "MusteriSifre": musteriSifre,
     "MusteriTelefon": musteriTelefon
   });
+  String mesaj = jsonDecode(response.body)["message"];
+  return mesaj;
 }
 
 Future<String> GirisBilgiGonder(String musteriMail, String musteriSifre) async {
@@ -200,6 +203,7 @@ Future<String> rezervasyonTamamla(
         "MasaID": masaID,
       });
   String mesaj = jsonDecode(response.body)["message"];
+  print(mesaj);
   return mesaj;
 }
 

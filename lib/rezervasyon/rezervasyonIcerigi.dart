@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:yervarmitez/components/roundedButton.dart';
-import 'package:yervarmitez/rezDetayJsonParse.dart';
 import 'package:yervarmitez/servisler.dart';
 
-import 'constants.dart';
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezDetayJsonParse.dart';
+
+import '../constants.dart';
 
 class RezervasyonIcerigi extends StatefulWidget {
   final String rezID;

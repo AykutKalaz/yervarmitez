@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:yervarmitez/rezervasyonDetay.dart';
 import 'package:yervarmitez/servisler.dart';
+
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezervasyonDetay.dart';
 
 class RezervasyonlarEkrani extends StatefulWidget {
   final String userID;

@@ -577,7 +577,6 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
                                     },
                                   );
                                 } else {
-                                  print(widget.userID);
                                   String mesaj = await rezervasyonTamamla(
                                       masaNum,
                                       (DateFormat.yMd('tr_TR')

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:yervarmitez/rezervasyonIcerigi.dart';
+
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezervasyonIcerigi.dart';
 
 class rezDetayOlusturucu extends StatelessWidget {
   final String resim;

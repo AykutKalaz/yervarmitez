@@ -19,8 +19,30 @@ class _BodyState extends State<Body> {
       musteriAdi = "",
       musteriSoyadi = "",
       musteriTelefon = "",
-      musteriSifre = "";
-  bool paroleTest = false;
+      musteriSifre = "",
+      mesaj;
+  bool paroleTest = false, kontrol = true, kontrol2 = true;
+
+  musteriMailKontrol(String musteriMailCheck) {
+    if (musteriMailCheck.contains('@') == true &&
+        musteriMailCheck.contains(".com") == true) {
+      kontrol = true;
+      return kontrol;
+    } else {
+      kontrol = false;
+      return kontrol;
+    }
+  }
+
+  musteriSifreKontrol(String musteriSifreCheck) {
+    if (musteriSifreCheck.length > 7 && musteriSifreCheck.length < 17) {
+      kontrol2 = true;
+      return 2;
+    } else {
+      kontrol2 = false;
+      return kontrol2;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +70,14 @@ class _BodyState extends State<Body> {
                 hintText: "isim@ornek.com",
                 onChanged: (value) {
                   musteriMail = value;
+                  musteriMailKontrol(musteriMail);
                 },
                 textInputType: TextInputType.emailAddress),
             TextFieldContainer(
               child: TextField(
                 onChanged: (value) {
                   musteriSifre = value;
-                  print(musteriSifre);
-                  print(value);
+                  musteriSifreKontrol(musteriSifre);
                 },
                 style: TextStyle(fontSize: 19),
                 obscureText: paroleTest,
@@ -99,9 +121,174 @@ class _BodyState extends State<Body> {
             ),
             RoundedButton(
               text: "Kayıt Ol",
-              press: () {
-                KayitBilgiGonder(musteriMail, musteriAdi, musteriSoyadi,
-                    musteriTelefon, musteriSifre);
+              press: () async {
+                if (musteriSifre == "" ||
+                    musteriTelefon == "" ||
+                    musteriMail == "" ||
+                    musteriSoyadi == "" ||
+                    musteriAdi == "") {
+                  return showDialog<void>(
+                    context: context,
+                    barrierDismissible: false, // user must tap button!
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(
+                          'Kayıt Bilgilendirme',
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              Text(
+                                "Kayıt bilgilerinden herhangi biri boş olamaz",
+                                style: TextStyle(
+                                  fontSize: 23,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          Container(
+                            child: RoundedButton(
+                              text: "Tamam",
+                              press: () {
+                                Navigator.of(context).pop();
+                              },
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  if (kontrol == true) {
+                    if (kontrol2 == true) {
+                      mesaj = await KayitBilgiGonder(musteriMail, musteriAdi,
+                          musteriSoyadi, musteriTelefon, musteriSifre);
+                      return showDialog<void>(
+                        context: context,
+                        barrierDismissible: false, // user must tap button!
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(
+                              'Kayıt Bilgilendirme',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            content: SingleChildScrollView(
+                              child: ListBody(
+                                children: <Widget>[
+                                  Text(
+                                    mesaj,
+                                    style: TextStyle(
+                                      fontSize: 23,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: <Widget>[
+                              Container(
+                                child: RoundedButton(
+                                  text: "Tamam",
+                                  press: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      return showDialog<void>(
+                        context: context,
+                        barrierDismissible: false, // user must tap button!
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(
+                              'Kayıt Bilgilendirme',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            content: SingleChildScrollView(
+                              child: ListBody(
+                                children: <Widget>[
+                                  Text(
+                                    "Şifreniz 8-16 karakter arasında olmalıdır.",
+                                    style: TextStyle(
+                                      fontSize: 23,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: <Widget>[
+                              Container(
+                                child: RoundedButton(
+                                  text: "Tamam",
+                                  press: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  } else {
+                    return showDialog<void>(
+                      context: context,
+                      barrierDismissible: false, // user must tap button!
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            'Kayıt Bilgilendirme',
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: <Widget>[
+                                Text(
+                                  "Lütfen geçerli bir mail adresi giriniz",
+                                  style: TextStyle(
+                                    fontSize: 23,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            Container(
+                              child: RoundedButton(
+                                text: "Tamam",
+                                press: () {
+                                  Navigator.of(context).pop();
+                                },
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                }
               },
             ),
             SizedBox(

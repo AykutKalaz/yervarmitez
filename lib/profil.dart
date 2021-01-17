@@ -21,6 +21,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
       musteriMail = "",
       musteriSifre = "",
       musteriTelefon = "";
+  bool kontrol = true, kontrol2 = true;
   final Kontrolcu = TextEditingController();
 
   @override
@@ -36,18 +37,40 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
     profilBilgi = profilDetayGetir(widget.userID);
   }
 
+  musteriMailKontrol(String musteriMailCheck) {
+    if (musteriMailCheck.contains('@') == true &&
+        musteriMailCheck.contains(".com") == true) {
+      print(musteriMailCheck);
+      kontrol = true;
+      return kontrol;
+    } else {
+      kontrol = false;
+      return kontrol;
+    }
+  }
+
+  musteriSifreKontrol(String musteriSifreCheck) {
+    print(musteriSifreCheck.length);
+    print(musteriSifre);
+    if (musteriSifreCheck.length > 7 && musteriSifreCheck.length < 17) {
+      print(musteriSifreCheck);
+      kontrol2 = true;
+      return 2;
+    } else {
+      kontrol2 = false;
+      return kontrol2;
+    }
+  }
+
   profiliGuncelle() async {
-    mesaj = await profilBilgiGuncelle(musteriMail, musteriAdi, musteriSoyadi,
-        musteriTelefon, musteriSifre, widget.userID);
-    print(mesaj);
-    if (mesaj == "Başarı ile profil güncellendi.") {
+    if (kontrol == false) {
       return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(
-              'Güncelleme',
+              'Güncelleme Bilgilendirme',
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
@@ -57,7 +80,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
               child: ListBody(
                 children: <Widget>[
                   Text(
-                    'Profiliniz başarıyla güncellendi',
+                    'Lütfen geçerli bir mail adresi giriniz.',
                     style: TextStyle(
                       fontSize: 23,
                     ),
@@ -72,7 +95,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
                   press: () {
                     Navigator.of(context).pop();
                   },
-                  color: Colors.green,
+                  color: Colors.red,
                 ),
               ),
             ],
@@ -80,25 +103,115 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
         },
       );
     } else {
-      return AlertDialog(
-        title: Text('Güncelleme'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Bir hata meydana geldi.'),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          RoundedButton(
-            text: "Tamam",
-            press: () {
-              Navigator.of(context).pop();
+      if (kontrol2 == true) {
+        mesaj = await profilBilgiGuncelle(musteriMail, musteriAdi,
+            musteriSoyadi, musteriTelefon, musteriSifre, widget.userID);
+        print(mesaj);
+        if (mesaj == "Başarı ile profil güncellendi.") {
+          return showDialog<void>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(
+                  'Güncelleme Bilgilendirme',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      Text(
+                        'Profiliniz başarıyla güncellendi',
+                        style: TextStyle(
+                          fontSize: 23,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  Container(
+                    child: RoundedButton(
+                      text: "Tamam",
+                      press: () {
+                        Navigator.of(context).pop();
+                      },
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              );
             },
-            color: Colors.red,
-          ),
-        ],
-      );
+          );
+        } else {
+          return showDialog<void>(
+              context: context,
+              barrierDismissible: false, // user must tap button!
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Güncelleme Bilgilendirme'),
+                  content: SingleChildScrollView(
+                    child: ListBody(
+                      children: <Widget>[
+                        Text('Bir hata meydana geldi.'),
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    RoundedButton(
+                      text: "Tamam",
+                      press: () {
+                        Navigator.of(context).pop();
+                      },
+                      color: Colors.red,
+                    ),
+                  ],
+                );
+              });
+        }
+      } else {
+        return showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                'Güncelleme Bilgilendirme',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text(
+                      'Şifreniz 8-16 karakter arasında olmalıdır.',
+                      style: TextStyle(
+                        fontSize: 23,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                Container(
+                  child: RoundedButton(
+                    text: "Tamam",
+                    press: () {
+                      Navigator.of(context).pop();
+                    },
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
@@ -144,7 +257,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
                         hintText: "İsminiz",
                         kontrol: profilDetaylari.userInfo[0].musteriAd,
                         onChanged: (value) {
-                          musteriAdi = value.toString();
+                          musteriAdi = value;
                         },
                       ),
                       RoundedInputField(
@@ -152,7 +265,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
                         hintText: "Soyadınız",
                         kontrol: profilDetaylari.userInfo[0].musteriSoyad,
                         onChanged: (value) {
-                          musteriSoyadi = value.toString();
+                          musteriSoyadi = value;
                         },
                       ),
                       RoundedInputField(
@@ -160,15 +273,16 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
                         hintText: "Şifreniz",
                         kontrol: profilDetaylari.userInfo[0].musteriSifre,
                         onChanged: (value) {
-                          musteriSifre = value.toString();
-                          print(musteriSifre);
+                          musteriSifre = value;
+                          musteriSifreKontrol(musteriSifre);
                         },
                       ),
                       RoundedInputField(
                         hintText: "Email adresiniz",
                         kontrol: profilDetaylari.userInfo[0].musteriEmail,
                         onChanged: (value) {
-                          musteriMail = value.toString();
+                          musteriMail = value;
+                          musteriMailKontrol(musteriMail);
                         },
                       ),
                       RoundedInputField(
@@ -176,7 +290,7 @@ class _ProfilEkraniState extends State<ProfilEkrani> {
                         hintText: "Telefon numaranız",
                         kontrol: profilDetaylari.userInfo[0].musteriTelefon,
                         onChanged: (value) {
-                          musteriTelefon = value.toString();
+                          musteriTelefon = value;
                         },
                       ),
                       RoundedButton(

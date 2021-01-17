@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:yervarmitez/constants.dart';
 import 'package:yervarmitez/profil.dart';
-import 'package:yervarmitez/rezervasyonlarim.dart';
 import 'package:yervarmitez/servisler.dart';
+
+import 'file:///E:/flutter/yervarmitez/lib/rezervasyon/rezervasyonlarim.dart';
 
 class KategoriEkrani extends StatefulWidget {
   final String userID;

@@ -33,8 +33,10 @@ class FirmaDetayEkrani extends StatefulWidget {
 class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
   String masaNum = '1', ilkSaat = "00:00", sonSaat = "00:00";
   DateTime selectedDate = DateTime.now();
+  String masaGonder = "";
   Future<MasaHakkinda> masaHakkinda;
   int ilkDeger, sonDeger, mesaiBas, mesaiSon, rezFiyat = 0;
+  List<String> masaID = [];
   List<Widget> yorumlar = [];
   List<String> saatler = [
     "00:00",
@@ -92,7 +94,7 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
       if (picked != null && picked != selectedDate) {
         setState(() {
           selectedDate = picked;
-          masaHakkinda = masaBilgiGetir(widget.firmaID, masaNum,
+          masaHakkinda = masaBilgiGetir(widget.firmaID, masaGonder,
               DateFormat.yMd('tr_TR').format(selectedDate).toString());
         });
       }
@@ -174,15 +176,21 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
               }
             }
 
-            void yorumGetir() {
+            yorumGetir() {
               yorumlar.clear();
-              for (int i = 0;
-                  i < firmaDetaylari.firmaDetay.yorumlar.length;
-                  i++) {
-                if (firmaDetaylari.firmaDetay.yorumlar.length < 1) {
-                  return yorumlar.add(Text("Henüz bir yorum bulunmuyor"));
-                } else {
-                  return yorumlar.add(
+              if (firmaDetaylari.firmaDetay.yorumlar.length == 0) {
+                yorumlar.add(
+                  Text(
+                    "Bu firmaya ait yorum bulunmamaktadır.",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  ),
+                );
+              } else {
+                for (int i = 0;
+                    i < firmaDetaylari.firmaDetay.yorumlar.length;
+                    i++) {
+                  yorumlar.add(
                     Padding(
                       padding: EdgeInsets.all(10),
                       child: Container(
@@ -218,6 +226,8 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
                       firmaDetaylari.firmaDetay.krokiler[i].krokiBirimFiyat;
                   birimSaat =
                       firmaDetaylari.firmaDetay.krokiler[i].krokiBirimSaat;
+                  masaID.add(
+                      firmaDetaylari.firmaDetay.krokiler[i].masalar[i].masaId);
 
                   return Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 0, 10),
@@ -229,10 +239,11 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
                       onChanged: (String newValue) {
                         this.setState(() {
                           masaNum = newValue;
-                          print(masaNum);
+                          masaGonder = masaID[(int.parse(masaNum)) - 1];
+                          print(masaGonder);
                           masaHakkinda = masaBilgiGetir(
                               int.parse(firmaDetaylari.firmaDetay.firmaId),
-                              masaNum,
+                              masaGonder,
                               DateFormat.yMd('tr_TR')
                                   .format(selectedDate)
                                   .toString());
@@ -578,7 +589,7 @@ class _FirmaDetayEkraniState extends State<FirmaDetayEkrani> {
                                   );
                                 } else {
                                   String mesaj = await rezervasyonTamamla(
-                                      masaNum,
+                                      masaGonder,
                                       (DateFormat.yMd('tr_TR')
                                               .format(selectedDate))
                                           .toString(),

@@ -38,7 +38,7 @@ class _RezervasyonDetayState extends State<RezervasyonDetay> {
                 style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red),
+                    color: Colors.black),
               ),
             );
           } else {

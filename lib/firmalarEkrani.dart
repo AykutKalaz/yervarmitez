@@ -69,6 +69,14 @@ class _FirmalarEkraniState extends State<FirmalarEkrani> {
 
   firmaOlustur(List<Firma> firmalistesi) {
     firmalar.clear();
+    if (firmalistesi.length == 0) {
+      firmalar.add(
+        Text(
+          "Bu il ve ilçeye ait ${widget.kategoriAdi} bulunamadı",
+          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
     for (int i = 0; i < firmalistesi.length; i++) {
       firmalar.add(
         Card(

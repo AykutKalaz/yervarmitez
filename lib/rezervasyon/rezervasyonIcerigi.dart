@@ -20,10 +20,13 @@ class RezervasyonIcerigi extends StatefulWidget {
 
 class _RezervasyonIcerigiState extends State<RezervasyonIcerigi> {
   Future<RezDetay> rezDetay;
-  String yorum, puan = "1", mesaj;
+  String yorum, puan, mesaj;
+  bool goster = true;
   @override
   void initState() {
     rezDetay = rezDetayGetir(widget.rezID);
+
+    print(widget.rezID);
     super.initState();
   }
 
@@ -125,7 +128,7 @@ class _RezervasyonIcerigiState extends State<RezervasyonIcerigi> {
                         : SizedBox(
                             height: size.height * 0.02,
                           ),
-                    (widget.rezDurum == "2")
+                    (widget.rezDurum == "2" && goster == true)
                         ? Column(
                             children: <Widget>[
                               Container(
@@ -146,85 +149,119 @@ class _RezervasyonIcerigiState extends State<RezervasyonIcerigi> {
                                   ),
                                 ),
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
-                                    "Firma için puan veriniz --> ",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: kPrimaryColor,
-                                    ),
+                              Container(
+                                width: size.width * 0.95,
+                                child: TextField(
+                                  onChanged: (value) {
+                                    puan = value;
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText:
+                                        "Puan veriniz. (Sadece 1-5 arasında)",
                                   ),
-                                  Container(
-                                    margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                    padding: EdgeInsets.fromLTRB(15, 1, 15, 1),
-                                    color: Colors.deepOrange,
-                                    child: DropdownButton<String>(
-                                      value: puan,
-                                      dropdownColor: Colors.orangeAccent,
-                                      onChanged: (String newValue) {
-                                        setState(() {
-                                          FocusScope.of(context)
-                                              .requestFocus(FocusNode());
-                                          puan = newValue;
-                                        });
-                                      },
-                                      items: <String>[
-                                        "1",
-                                        "2",
-                                        "3",
-                                        "4",
-                                        "5",
-                                      ].map<DropdownMenuItem<String>>((value) {
-                                        puan = value;
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black54,
                                   ),
-                                ],
+                                ),
                               ),
                               RoundedButton(
                                 text: "Yorum ve Puan Gönder",
                                 press: () async {
-                                  mesaj = await rezYorumGonder(
-                                      widget.rezID, yorum, puan);
-                                  return showDialog<void>(
-                                      context: context,
-                                      barrierDismissible:
-                                          false, // user must tap button!
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text('Yorum Yapma'),
-                                          content: SingleChildScrollView(
-                                            child: ListBody(
-                                              children: <Widget>[
-                                                Text(mesaj),
+                                  if (puan == "1" ||
+                                      puan == "2" ||
+                                      puan == "3" ||
+                                      puan == "4" ||
+                                      puan == "5") {
+                                    mesaj = await rezYorumGonder(
+                                        widget.rezID, yorum, puan);
+                                    goster = !goster;
+                                    if (mesaj ==
+                                        "Bu rezervasyona daha önce puan ve yorum yapılmıştır.") {
+                                      return showDialog<void>(
+                                          context: context,
+                                          barrierDismissible:
+                                              false, // user must tap button!
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Yorum Yapma'),
+                                              content: SingleChildScrollView(
+                                                child: ListBody(
+                                                  children: <Widget>[
+                                                    Text(
+                                                        "Bu rezervasyona daha önce puan ve yorum yapılmıştır."),
+                                                  ],
+                                                ),
+                                              ),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  child: Text("Tamam"),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  color: Colors.green,
+                                                ),
                                               ],
+                                            );
+                                          });
+                                    } else {
+                                      return showDialog<void>(
+                                          context: context,
+                                          barrierDismissible:
+                                              false, // user must tap button!
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Yorum Yapma'),
+                                              content: SingleChildScrollView(
+                                                child: ListBody(
+                                                  children: <Widget>[
+                                                    Text(
+                                                        "Bilgiler başarıyla kaydedildi."),
+                                                  ],
+                                                ),
+                                              ),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  child: Text("Tamam"),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  color: Colors.green,
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    }
+                                  } else {
+                                    return showDialog<void>(
+                                        context: context,
+                                        barrierDismissible:
+                                            false, // user must tap button!
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Yorum Yapma'),
+                                            content: SingleChildScrollView(
+                                              child: ListBody(
+                                                children: <Widget>[
+                                                  Text(
+                                                      "Puanınız 1-5 arasında olmalıdır."),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          actions: <Widget>[
-                                            FlatButton(
-                                              child: Text("Tamam"),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              color: Colors.green,
-                                            ),
-                                          ],
-                                        );
-                                      });
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text("Tamam"),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                color: Colors.red,
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  }
                                 },
                                 color: kPrimaryColor,
                               ),

@@ -20,7 +20,7 @@ class _BodyState extends State<Body> {
   String musteriID;
   bool paroleTest = true;
 
-  basariliGiris() {
+  GirisKontrol() {
     if (ctrl == "success") {
       showDialog<void>(
         context: context,
@@ -224,10 +224,10 @@ class _BodyState extends State<Body> {
               press: () {
                 if (musteriMail == "" || musteriSifre == "") {
                   ctrl = "null";
-                  basariliGiris();
+                  GirisKontrol();
                 } else {
                   deneme();
-                  basariliGiris();
+                  GirisKontrol();
                 }
               },
             ),

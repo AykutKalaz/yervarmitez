@@ -67,24 +67,42 @@ class _KategoriEkraniState extends State<KategoriEkrani> {
         backgroundColor: kPrimaryColor,
         title: Text("Kategori Ekrani"),
       ),
-      body: FutureBuilder(
-        future: kategori,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return GridView.count(
-              primary: false,
-              padding: EdgeInsets.all(20.0),
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              children: snapshot.data,
-            );
-          } else if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
-          } else {
-            return CircularProgressIndicator();
-          }
-        },
+      body: WillPopScope(
+        onWillPop: () async => showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Çıkmak istediğinden emin misin?'),
+            actions: <Widget>[
+              RaisedButton(
+                  color: Colors.red,
+                  child: Text('Çıkış Yap'),
+                  onPressed: () => Navigator.of(context).pop(true)),
+              RaisedButton(
+                  color: Colors.green,
+                  child: Text('Vazgeç'),
+                  onPressed: () => Navigator.of(context).pop(false)),
+            ],
+          ),
+        ),
+        child: FutureBuilder(
+          future: kategori,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return GridView.count(
+                primary: false,
+                padding: EdgeInsets.all(20.0),
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                children: snapshot.data,
+              );
+            } else if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: kPrimaryColor,
